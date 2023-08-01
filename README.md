@@ -4,6 +4,8 @@ This is a fork from https://github.com/Yonsm/MiService made some change for xiao
 
 ## Install
 ```
+pip3 install -U miservice_fork
+or 
 pip3 install .
 ```
 
@@ -88,7 +90,7 @@ export MI_DID=<Device ID|Name>
 
 查询设备的 MIoT 接口能力描述：
 ```
-micli.py spec xiaomi.wifispeaker.lx04
+micli spec xiaomi.wifispeaker.lx04
 ```
 其中分为属性获取、属性设置、动作调用三种描述。
 
@@ -124,6 +126,13 @@ micli.py 5-4 查询天气 #1
 micli.py 5-4 关灯 #0
 ```
 
-### 8. 其它应用
+## 8. 播放音乐
+
+```
+micli play ${mp3_url} 
+micli stop
+```
+
+### 9. 其它应用
 
 在扩展插件中使用，比如，参考 [ZhiMsg 小爱同学 TTS 播报/执行插件](https://github.com/Yonsm/ZhiMsg)

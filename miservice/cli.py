@@ -21,7 +21,17 @@ def usage():
     print("           export MI_USER=<Username>")
     print("           export MI_PASS=<Password>")
     print("           export MI_DID=<Device ID|Name>\n")
-    print(miio_command_help(prefix=sys.argv[0] + " "))
+    print(miio_command_help(prefix="micli" + " "))
+
+
+def find_device_id(hardware_data, mi_did):
+    for h in hardware_data:
+        if h.get("miotDID", "") == str(mi_did):
+            return h.get("deviceID")
+        else:
+            continue
+    else:
+        raise Exception(f"we have no mi_did: please use `micli mina` to check")
 
 
 async def main(args):
@@ -34,11 +44,24 @@ async def main(args):
                 env.get("MI_PASS"),
                 os.path.join(str(Path.home()), ".mi.token"),
             )
+            result = ""
+            mina_service = MiNAService(account)
+            result = await mina_service.device_list()
+            device_id = find_device_id(result, env.get("MI_DID", ""))
             if args.startswith("mina"):
-                service = MiNAService(account)
-                result = await service.device_list()
                 if len(args) > 4:
-                    await service.send_message(result, -1, args[4:])
+                    await mina_service.send_message(result, -1, args[4:])
+            elif args.split(" ")[0].strip() in ["play", "pause"]:
+                args_list = args.split(" ")
+                if len(args_list) == 1:
+                    if args_list[0] == "pause":
+                        await mina_service.player_pause(device_id)
+                    else:
+                        print("Please provice play url")
+                    return
+                # make device_id
+                await mina_service.play_by_url(device_id, args_list[1])
+                return
             else:
                 service = MiIOService(account)
                 result = await miio_command(

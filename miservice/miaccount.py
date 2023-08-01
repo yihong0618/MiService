@@ -101,7 +101,7 @@ class MiAccount:
             data=data,
             cookies=cookies,
             headers=headers,
-            ssl = False,
+            ssl=False,
         ) as r:
             raw = await r.read()
         resp = json.loads(raw[11:])

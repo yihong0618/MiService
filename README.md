@@ -130,7 +130,7 @@ micli.py 5-4 关灯 #0
 
 ```
 micli play ${mp3_url} 
-micli stop
+micli pause
 ```
 
 ### 9. 其它应用

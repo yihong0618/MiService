@@ -46,12 +46,14 @@ async def main(args):
             )
             result = ""
             mina_service = MiNAService(account)
-            result = await mina_service.device_list()
-            device_id = find_device_id(result, env.get("MI_DID", ""))
             if args.startswith("mina"):
                 if len(args) > 4:
                     await mina_service.send_message(result, -1, args[4:])
             elif args.split(" ")[0].strip() in ["play", "pause"]:
+                result = await mina_service.device_list()
+                if not env.get("MI_DID"):
+                    raise Exception("Please export MI_DID in your env")
+                device_id = find_device_id(result, env.get("MI_DID", ""))
                 args_list = args.split(" ")
                 if len(args_list) == 1:
                     if args_list[0] == "pause":

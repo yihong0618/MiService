@@ -74,7 +74,7 @@ export MI_PASS=<Password>
 ### 2. 查询自己的设备
 
 ```
-micli.py list
+micli list
 ```
 可以显示自己账号下的设备列表，包含名称、类型、DID、Token 等信息。
 

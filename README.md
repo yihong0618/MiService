@@ -1,6 +1,8 @@
 # MiService
-XiaoMi Cloud Service for mi.com
+XiaoMi Cloud Service for mi.com 
 This is a fork from https://github.com/Yonsm/MiService made some change for xiaogpt
+
+# 如果有无法登陆的问题请参考置顶 issue, 如果还是不行请留言
 
 ## Install
 ```

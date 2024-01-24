@@ -135,6 +135,22 @@ micli play ${mp3_url}
 micli pause
 ```
 
-### 9. 其它应用
+## 9. 播放音乐高级版
+
+```
+micli loop ${mp3_url}  # 循环播放
+micli pause
+
+# make a playlist name test.txt
+cat test.txt
+# http://192.168.6.212:8000/public/s4.mp3
+# http://192.168.6.212:8000/public/s1.mp3
+# http://192.168.6.212:8000/public/s2.mp3
+# http://193.168.6.212:8000/public/s3.mp3
+
+micli play_list test.txt # play the list
+```
+
+### 10. 其它应用
 
 在扩展插件中使用，比如，参考 [ZhiMsg 小爱同学 TTS 播报/执行插件](https://github.com/Yonsm/ZhiMsg)

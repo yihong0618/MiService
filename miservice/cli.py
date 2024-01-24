@@ -4,8 +4,12 @@ import logging
 import json
 import os
 import sys
+import signal
+import tempfile
 from pathlib import Path
 
+import aiohttp
+from mutagen.mp3 import MP3
 from miservice import (
     MiAccount,
     MiNAService,
@@ -34,6 +38,25 @@ def find_device_id(hardware_data, mi_did):
         raise Exception(f"we have no mi_did: please use `micli mina` to check")
 
 
+async def _get_duration(url, start=0, end=500):
+    headers = {"Range": f"bytes={start}-{end}"}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as response:
+            array_buffer = await response.read()
+    with tempfile.NamedTemporaryFile() as tmp:
+        tmp.write(array_buffer)
+        try:
+            m = MP3(tmp)
+        except:
+            headers = {"Range": f"bytes={0}-{1000}"}
+            async with session.get(url, headers=headers) as response:
+                array_buffer = await response.read()
+        with tempfile.NamedTemporaryFile() as tmp2:
+            tmp2.write(array_buffer)
+            m = MP3(tmp2)
+    return m.info.length
+
+
 async def main(args):
     try:
         async with ClientSession() as session:
@@ -49,7 +72,8 @@ async def main(args):
             if args.startswith("mina"):
                 if len(args) > 4:
                     await mina_service.send_message(result, -1, args[4:])
-            elif args.split(" ")[0].strip() in ["play", "pause"]:
+            elif args.split(" ")[0].strip() in ["play", "pause", "loop", "play_list"]:
+                arg = args.split(" ")[0].strip()
                 result = await mina_service.device_list()
                 if not env.get("MI_DID"):
                     raise Exception("Please export MI_DID in your env")
@@ -62,8 +86,29 @@ async def main(args):
                         print("Please provice play url")
                     return
                 # make device_id
-                await mina_service.play_by_url(device_id, args_list[1])
-                return
+                if arg == "loop":
+                    url = args_list[1]
+                    await mina_service.play_by_url(device_id, url)
+                    # set loop single mp3
+                    await mina_service.player_set_loop(device_id, 0)
+                elif arg == "play":
+                    await mina_service.play_by_url(device_id, args_list[1])
+                    # set loop list
+                    await mina_service.player_set_loop(device_id, 1)
+                elif arg == "play_list":
+                    try:
+                        await mina_service.player_set_loop(device_id, 1)
+                        file_name = args_list[1]
+                        with open(file_name, encoding="utf8") as f:
+                            lines = f.readlines()
+                            for line in lines:
+                                print(f"Will play {line.strip()}")
+                                await mina_service.play_by_url(device_id, line.strip())
+                                duration = await _get_duration(line)
+                                await asyncio.sleep(duration)
+                    except Exception as e:
+                        print(e)
+                        raise
             else:
                 service = MiIOService(account)
                 result = await miio_command(
@@ -73,7 +118,6 @@ async def main(args):
                 result = json.dumps(result, indent=2, ensure_ascii=False)
     except Exception as e:
         result = e
-    print(result)
 
 
 def micli():

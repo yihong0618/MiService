@@ -15,7 +15,7 @@ from setuptools import setup
 setup(
     name="miservice_fork",
     description="XiaoMi Cloud Service fork from https://github.com/Yonsm/MiService",
-    version="2.3.0",
+    version="2.3.1",
     license="MIT",
     author="Yonsm, yihong0618",
     author_email="Yonsm@qq.com, zouzou0208@gmail.com",
@@ -23,7 +23,7 @@ setup(
     packages=["miservice"],
     scripts=["micli.py"],
     python_requires=">=3.7",
-    install_requires=["aiohttp"],
+    install_requires=["aiohttp", "mutagen"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

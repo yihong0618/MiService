@@ -118,6 +118,7 @@ async def main(args):
                 result = json.dumps(result, indent=2, ensure_ascii=False)
     except Exception as e:
         result = e
+    print(result)
 
 
 def micli():

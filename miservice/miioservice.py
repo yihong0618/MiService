@@ -217,9 +217,11 @@ class MiIOService:
                         }
                     elif "value-list" in p:
                         values = {
-                            i["description"].replace(" ", "_")
-                            if i["description"]
-                            else str(i["value"]): i["value"]
+                            (
+                                i["description"].replace(" ", "_")
+                                if i["description"]
+                                else str(i["value"])
+                            ): i["value"]
                             for i in p["value-list"]
                         }
                     else:

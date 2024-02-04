@@ -4,7 +4,6 @@ import logging
 import json
 import os
 import sys
-import signal
 import tempfile
 from pathlib import Path
 
@@ -57,6 +56,27 @@ async def _get_duration(url, start=0, end=500):
     return m.info.length
 
 
+# TODO support more
+device_id_list = []
+
+
+async def miservice_pause(device_id):
+    """
+    for ctrl + c da
+    """
+    async with ClientSession() as session:
+        env = os.environ
+        account = MiAccount(
+            session,
+            env.get("MI_USER"),
+            env.get("MI_PASS"),
+            os.path.join(str(Path.home()), ".mi.token"),
+        )
+        mina_service = MiNAService(account)
+        await mina_service.player_pause(device_id)
+    print("Stop")
+
+
 async def main(args):
     try:
         async with ClientSession() as session:
@@ -78,6 +98,8 @@ async def main(args):
                 if not env.get("MI_DID"):
                     raise Exception("Please export MI_DID in your env")
                 device_id = find_device_id(result, env.get("MI_DID", ""))
+                # tricky add it to global
+                device_id_list.append(device_id)
                 args_list = args.split(" ")
                 if len(args_list) == 1:
                     if args_list[0] == "pause":
@@ -91,10 +113,12 @@ async def main(args):
                     await mina_service.play_by_url(device_id, url)
                     # set loop single mp3
                     await mina_service.player_set_loop(device_id, 0)
+                    return
                 elif arg == "play":
                     await mina_service.play_by_url(device_id, args_list[1])
                     # set loop list
                     await mina_service.player_set_loop(device_id, 1)
+                    return
                 elif arg == "play_list":
                     try:
                         await mina_service.player_set_loop(device_id, 1)
@@ -106,9 +130,10 @@ async def main(args):
                                 await mina_service.play_by_url(device_id, line.strip())
                                 duration = await _get_duration(line)
                                 await asyncio.sleep(duration)
+                        await mina_service.player_pause(device_id)
                     except Exception as e:
                         print(e)
-                        raise
+                        return
             else:
                 service = MiIOService(account)
                 result = await miio_command(
@@ -143,7 +168,13 @@ def micli():
             _LOGGER = logging.getLogger("miservice")
             _LOGGER.setLevel(level)
             _LOGGER.addHandler(logging.StreamHandler())
-        asyncio.run(main(" ".join(argv[argi:])))
+        try:
+            asyncio.run(main(" ".join(argv[argi:])))
+        except (KeyboardInterrupt, asyncio.exceptions.CancelledError) as e:
+            device_id = device_id_list[0]
+            asyncio.run(miservice_pause(device_id))
+            print(str(e))
+            pass
     else:
         usage()
 

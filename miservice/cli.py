@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 import aiohttp
+from rich import print
 from mutagen.mp3 import MP3
 from miservice import (
     MiAccount,
@@ -56,13 +57,27 @@ async def _get_duration(url, start=0, end=500):
     return m.info.length
 
 
+async def get_suno_playlist(is_random=False):
+    suno_playlist_url = "https://studio-api.suno.ai/api/playlist/1190bf92-10dc-4ce5-968a-7a377f37f984/?page=1"
+    song_play_dict = {}
+    async with aiohttp.ClientSession() as session:
+        async with session.get(suno_playlist_url) as response:
+            data = await response.json()
+            for d in data["playlist_clips"]:
+                clip = d.get("clip")
+                if clip:
+                    if clip.get("audio_url"):
+                        song_play_dict[clip["audio_url"]] = clip["title"]
+            return song_play_dict
+
+
 # TODO support more
 device_id_list = []
 
 
 async def miservice_pause(device_id):
     """
-    for ctrl + c da
+    for ctrl + c exit
     """
     async with ClientSession() as session:
         env = os.environ
@@ -92,7 +107,14 @@ async def main(args):
             if args.startswith("mina"):
                 if len(args) > 4:
                     await mina_service.send_message(result, -1, args[4:])
-            elif args.split(" ")[0].strip() in ["play", "pause", "loop", "play_list"]:
+            # TODO refactor this shit
+            elif args.split(" ")[0].strip() in [
+                "play",
+                "pause",
+                "loop",
+                "play_list",
+                "suno",
+            ]:
                 arg = args.split(" ")[0].strip()
                 result = await mina_service.device_list()
                 if not env.get("MI_DID"):
@@ -103,6 +125,16 @@ async def main(args):
                 args_list = args.split(" ")
                 if len(args_list) == 1:
                     if args_list[0] == "pause":
+                        await mina_service.player_pause(device_id)
+                    elif args_list[0] == "suno":
+                        song_dict = await get_suno_playlist()
+                        print("Will play suno trending list")
+                        print(song_dict)
+                        for song_url, title in song_dict.items():
+                            print(f"Will play {song_url.strip()} title {title}")
+                            await mina_service.play_by_url(device_id, song_url.strip())
+                            duration = await _get_duration(song_url)
+                            await asyncio.sleep(duration)
                         await mina_service.player_pause(device_id)
                     else:
                         print("Please provice play url")

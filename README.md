@@ -4,6 +4,37 @@ This is a fork from https://github.com/Yonsm/MiService made some change for xiao
 
 # 如果有无法登陆的问题请参考置顶 issue, 如果还是不行请留言
 
+## 本 fork 新增功能
+
+## -> 播放音乐
+
+```
+micli play ${mp3_url} 
+micli pause
+```
+
+## -> 播放音乐高级版
+
+```
+micli loop ${mp3_url}  # 循环播放
+micli pause
+
+# make a playlist name test.txt
+cat test.txt
+# http://192.168.6.212:8000/public/s4.mp3
+# http://192.168.6.212:8000/public/s1.mp3
+# http://192.168.6.212:8000/public/s2.mp3
+# http://193.168.6.212:8000/public/s3.mp3
+
+micli play_list test.txt # play the list
+```
+
+## -> 播放 suno.ai trending
+
+```
+micli suno 
+```
+
 ## Install
 ```
 pip3 install -U miservice_fork

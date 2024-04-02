@@ -35,6 +35,12 @@ micli play_list test.txt # play the list
 micli suno 
 ```
 
+## -> 播放 suno.ai trending random
+
+```
+micli suno_random
+```
+
 ## Install
 ```
 pip3 install -U miservice_fork

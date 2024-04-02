@@ -115,8 +115,8 @@ async def main(args):
                 "loop",
                 "play_list",
                 "suno",
-                "suno_random"
-                ]:
+                "suno_random",
+            ]:
                 arg = args.split(" ")[0].strip()
                 result = await mina_service.device_list()
                 if not env.get("MI_DID"):
@@ -130,11 +130,13 @@ async def main(args):
                         await mina_service.player_pause(device_id)
                     elif "suno" in args_list[0]:
                         song_dict = await get_suno_playlist()
-                        print("Will play suno trending list")
                         print(song_dict)
                         song_urls = list(song_dict.keys())
                         if args_list[0] == "suno_random":
                             random.shuffle(song_urls)
+                            print("Will play suno trending list randomly")
+                        else:
+                            print("Will play suno trending list")
                         for song_url in song_urls:
                             title = song_dict[song_url]
                             print(f"Will play {song_url.strip()} title {title}")

@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import tempfile
+import random
 from pathlib import Path
 
 import aiohttp
@@ -114,7 +115,8 @@ async def main(args):
                 "loop",
                 "play_list",
                 "suno",
-            ]:
+                "suno_random"
+                ]:
                 arg = args.split(" ")[0].strip()
                 result = await mina_service.device_list()
                 if not env.get("MI_DID"):
@@ -126,18 +128,22 @@ async def main(args):
                 if len(args_list) == 1:
                     if args_list[0] == "pause":
                         await mina_service.player_pause(device_id)
-                    elif args_list[0] == "suno":
+                    elif "suno" in args_list[0]:
                         song_dict = await get_suno_playlist()
                         print("Will play suno trending list")
                         print(song_dict)
-                        for song_url, title in song_dict.items():
+                        song_urls = list(song_dict.keys())
+                        if args_list[0] == "suno_random":
+                            random.shuffle(song_urls)
+                        for song_url in song_urls:
+                            title = song_dict[song_url]
                             print(f"Will play {song_url.strip()} title {title}")
                             await mina_service.play_by_url(device_id, song_url.strip())
                             duration = await _get_duration(song_url)
                             await asyncio.sleep(duration)
                         await mina_service.player_pause(device_id)
                     else:
-                        print("Please provice play url")
+                        print("Please provide a play URL")
                     return
                 # make device_id
                 if arg == "loop":

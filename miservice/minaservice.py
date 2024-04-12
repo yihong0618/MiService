@@ -101,7 +101,7 @@ class MiNAService:
             deviceId,
             "player_play_url",
             "mediaplayer",
-            {"url": url, "type": 0, "media": "app_ios"},
+            {"url": url, "type": 1, "media": "app_ios"},
         )
 
     async def send_message(self, devices, devno, message, volume=None):  # -1/0/1...

@@ -41,6 +41,12 @@ micli suno
 micli suno_random
 ```
 
+## -> 查看硬件信息
+
+```
+micli mina
+```
+
 ## Install
 ```
 pip3 install -U miservice_fork

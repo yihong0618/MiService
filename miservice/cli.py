@@ -105,12 +105,10 @@ async def main(args):
             )
             result = ""
             mina_service = MiNAService(account)
-            if args.startswith("mina"):
-                if len(args) > 4:
-                    await mina_service.send_message(result, -1, args[4:])
             # TODO refactor this shit
-            elif args.split(" ")[0].strip() in [
+            if args.split(" ")[0].strip() in [
                 "play",
+                "mina",
                 "pause",
                 "loop",
                 "play_list",
@@ -128,6 +126,8 @@ async def main(args):
                 if len(args_list) == 1:
                     if args_list[0] == "pause":
                         await mina_service.player_pause(device_id)
+                    elif args_list[0] == "mina" and len(result) > 0:
+                        print(result[0])
                     elif "suno" in args_list[0]:
                         song_dict = await get_suno_playlist()
                         print(song_dict)

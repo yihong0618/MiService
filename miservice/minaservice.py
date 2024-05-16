@@ -96,12 +96,12 @@ class MiNAService:
             {"media": "common", "type": type},
         )
 
-    async def play_by_url(self, deviceId, url):
+    async def play_by_url(self, deviceId, url, _type=2):
         return await self.ubus_request(
             deviceId,
             "player_play_url",
             "mediaplayer",
-            {"url": url, "type": 1, "media": "app_ios"},
+            {"url": url, "type": _type, "media": "app_ios"},
         )
 
     async def send_message(self, devices, devno, message, volume=None):  # -1/0/1...

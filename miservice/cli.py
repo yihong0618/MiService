@@ -76,7 +76,7 @@ async def get_suno_playlist(is_random=False):
 device_id_list = []
 
 
-async def miservice_pause(device_id):
+async def miservice_stop(device_id):
     """
     for ctrl + c exit
     """
@@ -89,7 +89,7 @@ async def miservice_pause(device_id):
             os.path.join(str(Path.home()), ".mi.token"),
         )
         mina_service = MiNAService(account)
-        await mina_service.player_pause(device_id)
+        await mina_service.player_stop(device_id)
     print("Stop")
 
 
@@ -110,6 +110,7 @@ async def main(args):
                 "play",
                 "mina",
                 "pause",
+                "stop",
                 "loop",
                 "play_list",
                 "suno",
@@ -124,8 +125,8 @@ async def main(args):
                 device_id_list.append(device_id)
                 args_list = args.split(" ")
                 if len(args_list) == 1:
-                    if args_list[0] == "pause":
-                        await mina_service.player_pause(device_id)
+                    if args_list[0] in ["pause", "stop"]:
+                        await mina_service.player_stop(device_id)
                     elif args_list[0] == "mina" and len(result) > 0:
                         print(result[0])
                     elif "suno" in args_list[0]:
@@ -143,7 +144,7 @@ async def main(args):
                             await mina_service.play_by_url(device_id, song_url.strip())
                             duration = await _get_duration(song_url)
                             await asyncio.sleep(duration)
-                        await mina_service.player_pause(device_id)
+                        await mina_service.player_stop(device_id)
                     else:
                         print("Please provide a play URL")
                     return
@@ -170,7 +171,7 @@ async def main(args):
                                 await mina_service.play_by_url(device_id, line.strip())
                                 duration = await _get_duration(line)
                                 await asyncio.sleep(duration)
-                        await mina_service.player_pause(device_id)
+                        await mina_service.player_stop(device_id)
                     except Exception as e:
                         print(e)
                         return
@@ -212,7 +213,7 @@ def micli():
             asyncio.run(main(" ".join(argv[argi:])))
         except (KeyboardInterrupt, asyncio.exceptions.CancelledError) as e:
             device_id = device_id_list[0]
-            asyncio.run(miservice_pause(device_id))
+            asyncio.run(miservice_stop(device_id))
             print(str(e))
             pass
     else:

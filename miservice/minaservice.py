@@ -72,6 +72,14 @@ class MiNAService:
             {"action": "pause", "media": "app_ios"},
         )
 
+    async def player_stop(self, deviceId):
+        return await self.ubus_request(
+            deviceId,
+            "player_play_operation",
+            "mediaplayer",
+            {"action": "stop", "media": "app_ios"},
+        )
+
     async def player_play(self, deviceId):
         return await self.ubus_request(
             deviceId,

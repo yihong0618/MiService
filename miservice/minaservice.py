@@ -8,10 +8,21 @@ import aiohttp
 
 _LOGGER = logging.getLogger(__package__)
 
+_USE_PLAY_MUSIC_API = [
+    "LX04",
+    "L05B",
+    "L05C",
+    "L06",
+    "L06A",
+    "X08A",
+    "X10A",
+]
+
 
 class MiNAService:
     def __init__(self, account: MiAccount):
         self.account = account
+        self.device2hardware = {}
 
     async def _get_duration(self, url):
         start = 0
@@ -105,11 +116,47 @@ class MiNAService:
         )
 
     async def play_by_url(self, deviceId, url, _type=2):
+        if deviceId not in self.device2hardware:
+            await self._init_devices()
+        hardware = self.device2hardware[deviceId]
+        if hardware in _USE_PLAY_MUSIC_API:
+            return await self.play_by_music_url(deviceId, url, _type)
+        else:
+            return await self.ubus_request(
+                deviceId,
+                "player_play_url",
+                "mediaplayer",
+                {"url": url, "type": _type, "media": "app_ios"},
+            )
+
+    async def _init_devices(self):
+        hardware_data = await self.device_list()
+        for h in hardware_data:
+            deviceId = h.get("deviceID", "")
+            hardware = h.get("hardware", "")
+            self.device2hardware[deviceId] = hardware
+
+    async def play_by_music_url(self, deviceId, url, _type):
+        _LOGGER.debug("play_by_music_url url:%s, type:%d", url, _type)
+        audio_type = ""
+        if _type == 1:
+            # If set to MUSIC, the light will be on
+            audio_type = "MUSIC"
+        audio_id = get_random(30)
+        music = {
+            "payload": {
+                "audio_items": [
+                    {"item_id": {"audio_id": audio_id}, "stream": {"url": url}}
+                ],
+                "audio_type": audio_type,
+            }
+        }
+        strmusic = json.dumps(music)
         return await self.ubus_request(
             deviceId,
-            "player_play_url",
+            "player_play_music",
             "mediaplayer",
-            {"url": url, "type": _type, "media": "app_ios"},
+            {"startaudioid": audio_id, "music": f"{strmusic}"},
         )
 
     async def send_message(self, devices, devno, message, volume=None):  # -1/0/1...

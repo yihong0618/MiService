@@ -134,7 +134,8 @@ class MiNAService:
         for h in hardware_data:
             deviceId = h.get("deviceID", "")
             hardware = h.get("hardware", "")
-            self.device2hardware[deviceId] = hardware
+            if deviceId and hardware:
+                self.device2hardware[deviceId] = hardware
 
     async def play_by_music_url(self, deviceId, url, _type):
         _LOGGER.debug("play_by_music_url url:%s, type:%d", url, _type)
@@ -151,12 +152,11 @@ class MiNAService:
                 "audio_type": audio_type,
             }
         }
-        strmusic = json.dumps(music)
         return await self.ubus_request(
             deviceId,
             "player_play_music",
             "mediaplayer",
-            {"startaudioid": audio_id, "music": f"{strmusic}"},
+            {"startaudioid": audio_id, "music": json.dumps(music)},
         )
 
     async def send_message(self, devices, devno, message, volume=None):  # -1/0/1...

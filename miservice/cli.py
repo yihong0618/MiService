@@ -40,6 +40,20 @@ def find_device_id(hardware_data, mi_did):
 
 
 async def _get_duration(url, start=0, end=500):
+    url = url.strip()
+    # drop url params
+    url_base = url.split("?")[0]
+    if not url_base.endswith(".mp3"):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                url,
+                allow_redirects=True,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
+                },
+            ) as response:
+                url = response.url
+
     headers = {"Range": f"bytes={start}-{end}"}
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as response:
@@ -141,8 +155,8 @@ async def main(args):
                         for song_url in song_urls:
                             title = song_dict[song_url]
                             print(f"Will play {song_url.strip()} title {title}")
-                            await mina_service.play_by_url(device_id, song_url.strip())
                             duration = await _get_duration(song_url)
+                            await mina_service.play_by_url(device_id, song_url.strip())
                             await asyncio.sleep(duration)
                         await mina_service.player_stop(device_id)
                     else:
@@ -168,8 +182,8 @@ async def main(args):
                             lines = f.readlines()
                             for line in lines:
                                 print(f"Will play {line.strip()}")
-                                await mina_service.play_by_url(device_id, line.strip())
                                 duration = await _get_duration(line)
+                                await mina_service.play_by_url(device_id, line.strip())
                                 await asyncio.sleep(duration)
                         await mina_service.player_stop(device_id)
                     except Exception as e:

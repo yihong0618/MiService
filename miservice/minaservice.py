@@ -137,20 +137,39 @@ class MiNAService:
             if deviceId and hardware:
                 self.device2hardware[deviceId] = hardware
 
-    async def play_by_music_url(self, deviceId, url, _type):
+    async def play_by_music_url(
+        self, deviceId, url, _type=2, audio_id="1582971365183456177", id="355454500"
+    ):
         _LOGGER.debug("play_by_music_url url:%s, type:%d", url, _type)
         audio_type = ""
         if _type == 1:
             # If set to MUSIC, the light will be on
             audio_type = "MUSIC"
-        audio_id = get_random(30)
         music = {
             "payload": {
-                "audio_items": [
-                    {"item_id": {"audio_id": audio_id}, "stream": {"url": url}}
-                ],
                 "audio_type": audio_type,
-            }
+                "audio_items": [
+                    {
+                        "item_id": {
+                            "audio_id": audio_id,
+                            "cp": {
+                                "album_id": "-1",
+                                "episode_index": 0,
+                                "id": id,
+                                "name": "xiaowei",
+                            },
+                        },
+                        "stream": {"url": url},
+                    }
+                ],
+                "list_params": {
+                    "listId": "-1",
+                    "loadmore_offset": 0,
+                    "origin": "xiaowei",
+                    "type": "MUSIC",
+                },
+            },
+            "play_behavior": "REPLACE_ALL",
         }
         return await self.ubus_request(
             deviceId,

@@ -109,7 +109,7 @@ class MiIOService:
                     "token": i["token"],
                 }
                 for i in result
-                if not name or name in i["name"]
+                if not name or name in i["did"]
             ]
         )
 

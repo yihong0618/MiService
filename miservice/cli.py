@@ -120,6 +120,7 @@ async def main(args):
             mina_service = MiNAService(account)
             # TODO refactor this shit
             if args.split(" ")[0].strip() in [
+                "message",
                 "play",
                 "mina",
                 "pause",
@@ -188,6 +189,9 @@ async def main(args):
                     except Exception as e:
                         print(e)
                         return
+                elif arg == "message":
+                    await mina_service.text_to_speech(device_id, args_list[1])
+                    return
             else:
                 service = MiIOService(account)
                 result = await miio_command(

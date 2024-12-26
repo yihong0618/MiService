@@ -1,10 +1,7 @@
 import json
-import tempfile
 import logging
-from mutagen.mp3 import MP3
 
 from .miaccount import MiAccount, get_random
-import aiohttp
 
 _LOGGER = logging.getLogger(__package__)
 
@@ -23,19 +20,6 @@ class MiNAService:
     def __init__(self, account: MiAccount):
         self.account = account
         self.device2hardware = {}
-
-    async def _get_duration(self, url):
-        start = 0
-        end = 500
-        headers = {"Range": f"bytes={start}-{end}"}
-        response = aiohttp.get(self.url, headers=headers)
-        array_buffer = response.content
-        print(array_buffer)
-        with tempfile.NamedTemporaryFile() as tmp:
-            tmp.write(array_buffer)
-            m = MP3(tmp)
-            print(m.info.length)
-        return m.info.length
 
     async def mina_request(self, uri, data=None):
         requestId = "app_ios_" + get_random(30)
@@ -61,6 +45,50 @@ class MiNAService:
             {"deviceId": deviceId, "message": message, "method": method, "path": path},
         )
         return result
+
+    async def get_latest_ask(self, deviceId):
+        from typing import TypedDict
+        class result_message(TypedDict):
+            class result_response(TypedDict):
+                class response_answer(TypedDict):
+                    domain: str
+                    action: str
+                    content: str
+                    question: str
+                answer: list[response_answer]
+            request_id: str
+            timestamp_ms: int
+            response: result_response
+        messages = []
+        result = await self.ubus_request(
+            deviceId, "nlp_result_get", "mibrain", {}
+        )
+        if 0 != result['data']['code']:
+            return messages
+        result = json.loads(result['data']['info'])['result']
+        for item in result:
+            if not 'nlp' in item:
+                continue
+            nlp = json.loads(item['nlp'])
+            msg = result_message(
+                request_id=nlp['meta']['request_id'],
+                timestamp_ms=int(nlp['meta']['timestamp']),
+                response=result_message.result_response(
+                    answer=[]
+                )
+            )
+            assert 1 == len(nlp['response']['answer'])
+            for answer in nlp['response']['answer']:
+                msg['response']['answer'].append(
+                    result_message.result_response.response_answer(
+                        domain=answer['domain'],
+                        action=answer['action'],
+                        content=answer['content']['to_speak'],
+                        question=answer['intention']['query']
+                    )
+                )
+            messages.append(msg)
+        return messages
 
     async def text_to_speech(self, deviceId, text):
         return await self.ubus_request(

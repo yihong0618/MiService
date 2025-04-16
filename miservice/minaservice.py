@@ -7,6 +7,7 @@ _LOGGER = logging.getLogger(__package__)
 
 _USE_PLAY_MUSIC_API = [
     "LX04",
+    "LX05",
     "L05B",
     "L05C",
     "L06",

@@ -1,4 +1,5 @@
 aiohttp
 mutagen
 rich
+fake-useragent
 

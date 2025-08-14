@@ -49,6 +49,7 @@ class MiNAService:
 
     async def get_latest_ask(self, deviceId):
         from typing import TypedDict
+
         class result_message(TypedDict):
             class result_response(TypedDict):
                 class response_answer(TypedDict):
@@ -56,36 +57,35 @@ class MiNAService:
                     action: str
                     content: str
                     question: str
+
                 answer: list[response_answer]
+
             request_id: str
             timestamp_ms: int
             response: result_response
+
         messages = []
-        result = await self.ubus_request(
-            deviceId, "nlp_result_get", "mibrain", {}
-        )
-        if 0 != result['data']['code']:
+        result = await self.ubus_request(deviceId, "nlp_result_get", "mibrain", {})
+        if 0 != result["data"]["code"]:
             return messages
-        result = json.loads(result['data']['info'])['result']
+        result = json.loads(result["data"]["info"])["result"]
         for item in result:
-            if not 'nlp' in item:
+            if not "nlp" in item:
                 continue
-            nlp = json.loads(item['nlp'])
+            nlp = json.loads(item["nlp"])
             msg = result_message(
-                request_id=nlp['meta']['request_id'],
-                timestamp_ms=int(nlp['meta']['timestamp']),
-                response=result_message.result_response(
-                    answer=[]
-                )
+                request_id=nlp["meta"]["request_id"],
+                timestamp_ms=int(nlp["meta"]["timestamp"]),
+                response=result_message.result_response(answer=[]),
             )
-            assert 1 == len(nlp['response']['answer'])
-            for answer in nlp['response']['answer']:
-                msg['response']['answer'].append(
+            assert 1 == len(nlp["response"]["answer"])
+            for answer in nlp["response"]["answer"]:
+                msg["response"]["answer"].append(
                     result_message.result_response.response_answer(
-                        domain=answer['domain'],
-                        action=answer['action'],
-                        content=answer['content']['to_speak'],
-                        question=answer['intention']['query']
+                        domain=answer["domain"],
+                        action=answer["action"],
+                        content=answer["content"]["to_speak"],
+                        question=answer["intention"]["query"],
                     )
                 )
             messages.append(msg)

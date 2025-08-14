@@ -19,6 +19,7 @@ from aiohttp import ClientSession
 from mutagen.mp3 import MP3
 from rich import print
 
+
 def usage():
     print("MiService %s - XiaoMi Cloud Service\n")
     print("Usage: The following variables must be set:")
@@ -38,7 +39,7 @@ def find_device_id(hardware_data, mi_did):
         raise Exception(f"we have no mi_did: please use `micli mina` to check")
 
 
-async def _get_duration(url:str, start=0, end=500):
+async def _get_duration(url: str, start=0, end=500):
     url = url.strip()
     # drop url params
     url_base = url.split("?")[0]

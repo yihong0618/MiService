@@ -96,6 +96,8 @@ class MiAccount:
         if "passToken" in self.token:
             cookies["userId"] = self.token["userId"]
             cookies["passToken"] = self.token["passToken"]
+        else:
+            cookies["passToken"] = ""
         url = "https://account.xiaomi.com/pass/" + uri
         async with self.session.request(
             "GET" if data is None else "POST",

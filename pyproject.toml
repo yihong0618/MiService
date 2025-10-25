@@ -1,0 +1,36 @@
+[project]
+name = "miservice_fork"
+version = "2.9.0"
+description = "XiaoMi Cloud Service fork from https://github.com/Yonsm/MiService"
+authors = [
+    {name = "yihong0618", email = "zouzou0208@gmail.com"},
+    {name = "Yonsm, yihong0618", email = "Yonsm@qq.com, zouzou0208@gmail.com"},
+]
+dependencies = [
+    "setuptools>=78.1.1",
+    "aiohttp",
+    "mutagen",
+    "rich",
+    "fake-useragent>=2.2.0",
+]
+requires-python = ">=3.8"
+readme = "README.md"
+license = {text = "MIT"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+
+
+[project.urls]
+Homepage = "https://github.com/yihong0618/MiService"
+
+[project.scripts]
+micli = "miservice.cli:micli"
+[tool.pdm]
+distribution = true
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"

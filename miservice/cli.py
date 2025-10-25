@@ -1,4 +1,3 @@
-from aiohttp import ClientSession
 import asyncio
 import logging
 import json
@@ -8,9 +7,6 @@ import tempfile
 import random
 from pathlib import Path
 
-import aiohttp
-from rich import print
-from mutagen.mp3 import MP3
 from miservice import (
     MiAccount,
     MiNAService,
@@ -18,6 +14,10 @@ from miservice import (
     miio_command,
     miio_command_help,
 )
+
+from aiohttp import ClientSession
+from mutagen.mp3 import MP3
+from rich import print
 
 
 def usage():
@@ -39,12 +39,12 @@ def find_device_id(hardware_data, mi_did):
         raise Exception(f"we have no mi_did: please use `micli mina` to check")
 
 
-async def _get_duration(url, start=0, end=500):
+async def _get_duration(url: str, start=0, end=500):
     url = url.strip()
     # drop url params
     url_base = url.split("?")[0]
     if not url_base.endswith(".mp3"):
-        async with aiohttp.ClientSession() as session:
+        async with ClientSession() as session:
             async with session.get(
                 url,
                 allow_redirects=True,
@@ -55,7 +55,7 @@ async def _get_duration(url, start=0, end=500):
                 url = response.url
 
     headers = {"Range": f"bytes={start}-{end}"}
-    async with aiohttp.ClientSession() as session:
+    async with ClientSession() as session:
         async with session.get(url, headers=headers) as response:
             array_buffer = await response.read()
     with tempfile.NamedTemporaryFile() as tmp:
@@ -75,7 +75,7 @@ async def _get_duration(url, start=0, end=500):
 async def get_suno_playlist(is_random=False):
     suno_playlist_url = "https://studio-api.suno.ai/api/playlist/1190bf92-10dc-4ce5-968a-7a377f37f984/?page=1"
     song_play_dict = {}
-    async with aiohttp.ClientSession() as session:
+    async with ClientSession() as session:
         async with session.get(suno_playlist_url) as response:
             data = await response.json()
             for d in data["playlist_clips"]:
@@ -121,6 +121,7 @@ async def main(args):
             mina_service = MiNAService(account)
             # TODO refactor this shit
             if args.split(" ")[0].strip() in [
+                "message",
                 "play",
                 "mina",
                 "pause",
@@ -189,6 +190,9 @@ async def main(args):
                     except Exception as e:
                         print(e)
                         return
+                elif arg == "message":
+                    await mina_service.text_to_speech(device_id, args_list[1])
+                    return
             else:
                 service = MiIOService(account)
                 result = await miio_command(

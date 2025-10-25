@@ -7,6 +7,7 @@ import random
 import string
 from urllib import parse
 from aiohttp import ClientSession
+from fake_useragent import UserAgent
 
 _LOGGER = logging.getLogger(__package__)
 
@@ -48,6 +49,7 @@ class MiAccount:
             MiTokenStore(token_store) if isinstance(token_store, str) else token_store
         )
         self.token = token_store is not None and self.token_store.load_token()
+        self.ua = UserAgent()  # 初始化随机 User-Agent 生成器
 
     async def login(self, sid):
         if not self.token:
@@ -87,9 +89,8 @@ class MiAccount:
             return False
 
     async def _serviceLogin(self, uri, data=None):
-        headers = {
-            "User-Agent": "APP/com.xiaomi.mihome APPV/6.0.103 iosPassportSDK/3.9.0 iOS/14.4 miHSTS"
-        }
+        ua = UserAgent()
+        headers = {"User-Agent": ua.random}
         cookies = {"sdkVersion": "3.9", "deviceId": self.token["deviceId"]}
         if "passToken" in self.token:
             cookies["userId"] = self.token["userId"]

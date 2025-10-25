@@ -50,6 +50,7 @@ class MiAccount:
         )
         self.token = token_store is not None and self.token_store.load_token()
         self.ua = UserAgent()  # 初始化随机 User-Agent 生成器
+        self.now_ua = self.ua.random
 
     async def login(self, sid):
         if not self.token:
@@ -89,8 +90,8 @@ class MiAccount:
             return False
 
     async def _serviceLogin(self, uri, data=None):
-        ua = UserAgent()
-        headers = {"User-Agent": ua.random}
+        self.now_ua = self.ua.random
+        headers = {"User-Agent": self.now_ua}
         cookies = {"sdkVersion": "3.9", "deviceId": self.token["deviceId"]}
         if "passToken" in self.token:
             cookies["userId"] = self.token["userId"]
@@ -121,6 +122,7 @@ class MiAccount:
         return serviceToken
 
     async def mi_request(self, sid, url, data, headers, relogin=True):
+        headers["User-Agent"] = self.now_ua
         if (self.token and sid in self.token) or await self.login(sid):  # Ensure login
             cookies = {
                 "userId": self.token["userId"],

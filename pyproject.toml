@@ -1,6 +1,6 @@
 [project]
 name = "miservice_fork"
-version = "2.9.0"
+version = "2.9.2"
 description = "XiaoMi Cloud Service fork from https://github.com/Yonsm/MiService"
 authors = [
     {name = "yihong0618", email = "zouzou0208@gmail.com"},

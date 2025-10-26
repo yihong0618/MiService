@@ -14,6 +14,10 @@ _USE_PLAY_MUSIC_API = [
     "L06A",
     "X08A",
     "X10A",
+    "X08C",
+    "M01",
+    "X08E",
+    "X8F",
 ]
 
 
